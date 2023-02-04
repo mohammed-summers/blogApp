@@ -2,6 +2,7 @@ package com.springboot.blog.controller;
 
 import com.springboot.blog.dto.PostDto;
 import com.springboot.blog.entity.Post;
+import com.springboot.blog.service.PostService;
 import com.springboot.blog.service.PostServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,35 +16,37 @@ import java.util.List;
 public class PostController {
 
     @Autowired
-    private PostServiceImpl postServiceImpl;
+    private PostService postService;
 
 
     @PostMapping("/posts")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
-        PostDto newPostDto = postServiceImpl.createPost(postDto);
+        PostDto newPostDto = postService.createPost(postDto);
         return new ResponseEntity<>(newPostDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/posts")
     public ResponseEntity<List<PostDto>> getAllPosts(){
-        List<PostDto> allPosts = postServiceImpl.getAllPosts();
+        List<PostDto> allPosts = postService.getAllPosts();
         return new ResponseEntity<>(allPosts, HttpStatus.OK);
     }
 
     @GetMapping("/post/{id}")
-    public ResponseEntity<PostDto> getPostById(@PathVariable("id") Long postId){
-        PostDto postById = postServiceImpl.getPostById(postId);
+    public ResponseEntity<PostDto> getPostById(@PathVariable("id") long postId){
+        PostDto postById = postService.getPostById(postId);
         return new ResponseEntity<>(postById, HttpStatus.OK);
     }
 
-//    @GetMapping("/student/{id}")
-//    public Student studentPathVariable(@PathVariable("id") int studentId){
-//        Student student = new Student(studentId, "selma", "summers");
-//        return student;
-//    }
-
-    @GetMapping("/h")
-    public String hello(){
-        return  "hello";
+    @PutMapping("/post/{id}")
+    public ResponseEntity<PostDto> updatePostById(@RequestBody PostDto postDto, @PathVariable("id") Long postId){
+        PostDto updatedPostDto = postService.updatePostById(postDto, postId);
+        return new ResponseEntity<>(updatedPostDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("/post/{id}")
+    public ResponseEntity<String> deletePostById(@PathVariable("id") long postId){
+        postService.deletePostById(postId);
+        return new ResponseEntity<>("Post Entity was deleted", HttpStatus.OK);
+    }
+
 }

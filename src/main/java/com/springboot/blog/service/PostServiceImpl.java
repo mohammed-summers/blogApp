@@ -2,20 +2,21 @@ package com.springboot.blog.service;
 
 import com.springboot.blog.dto.PostDto;
 import com.springboot.blog.entity.Post;
+import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class PostServiceImpl {
+public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepo;
 
+    @Override
     public PostDto createPost(PostDto postDto){
         Post post = postDtoToPost(postDto);
         Post newPost = postRepo.save(post);
@@ -23,6 +24,7 @@ public class PostServiceImpl {
         return newPostDto;
     }
 
+    @Override
     public List<PostDto> getAllPosts(){
         List<PostDto> postDtos = new ArrayList<>();
         List<Post> allPost = postRepo.findAll();
@@ -33,15 +35,28 @@ public class PostServiceImpl {
         return postDtos;
     };
 
-    public PostDto getPostById(Long postId){
-        Optional<Post> postById = postRepo.findById(postId);
-        Post post = postById.get();
-        PostDto postDto = postToPostDto(post);
-        return postDto;
+    @Override
+    public PostDto getPostById(long postId){
+        Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        return postToPostDto(post);
+    };
+
+    @Override
+    public PostDto updatePostById(PostDto postDto, Long postId){
+        Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        post.setTitle(postDto.getTitle());
+        post.setDescription(postDto.getDescription());
+        post.setContent(postDto.getContent());
+
+        Post updatedPost = postRepo.save(post);
+        return postToPostDto(updatedPost);
     }
 
-
-
+    @Override
+    public void deletePostById(long postId){
+        Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        postRepo.delete(post);
+    }
 
     private Post postDtoToPost(PostDto postDto){
         Post post = new Post();
