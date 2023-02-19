@@ -9,6 +9,10 @@ import com.springboot.blog.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 public class CommentServiceImpl implements CommentService{
 
@@ -31,7 +35,12 @@ public class CommentServiceImpl implements CommentService{
         return convertToDto(newComment);
     }
 
-
+    @Override
+    public List<CommentDto> getAllCommentsByPostId(Long postId) {
+        List<Comment> comments = commentRepo.findByPostId(postId);
+        List<CommentDto> commentDtos = comments.stream().map(comment -> convertToDto(comment)).collect(Collectors.toList());
+        return commentDtos;
+    }
 
 
     private Comment convertToEntity(CommentDto commentDto){
