@@ -5,6 +5,7 @@ import com.springboot.blog.entity.Post;
 import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.payload.PostResponse;
 import com.springboot.blog.repository.PostRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,21 +13,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
 
-    @Autowired
     private PostRepository postRepo;
+
+    private ModelMapper mapper;
+
+    public PostServiceImpl(PostRepository postRepo, ModelMapper mapper) {
+        this.postRepo = postRepo;
+        this.mapper = mapper;
+    }
 
     @Override
     public PostDto createPost(PostDto postDto){
-        Post post = postDtoToPost(postDto);
+        Post post = convertToPost(postDto);
         Post newPost = postRepo.save(post);
-        PostDto newPostDto = postToPostDto(newPost);
+        PostDto newPostDto = convertToPostDto(newPost);
         return newPostDto;
     }
 
@@ -40,7 +46,7 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<Post> posts = postRepo.findAll(pageable);
         List<Post> listOfPosts = posts.getContent();
-        List<PostDto> content = listOfPosts.stream().map(post -> postToPostDto(post)).collect(Collectors.toList());
+        List<PostDto> content = listOfPosts.stream().map(post -> convertToPostDto(post)).collect(Collectors.toList());
 
         PostResponse postResponse = new PostResponse();
         postResponse.setContent(content);
@@ -55,7 +61,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto getPostById(long postId){
         Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        return postToPostDto(post);
+        return convertToPostDto(post);
     };
 
     @Override
@@ -66,7 +72,7 @@ public class PostServiceImpl implements PostService {
         post.setContent(postDto.getContent());
 
         Post updatedPost = postRepo.save(post);
-        return postToPostDto(updatedPost);
+        return convertToPostDto(updatedPost);
     }
 
     @Override
@@ -75,21 +81,23 @@ public class PostServiceImpl implements PostService {
         postRepo.delete(post);
     }
 
-    private Post postDtoToPost(PostDto postDto){
-        Post post = new Post();
-        post.setId(postDto.getId());
-        post.setTitle(postDto.getTitle());
-        post.setDescription(postDto.getContent());
-        post.setContent(postDto.getContent());
+    private Post convertToPost(PostDto postDto){
+        Post post = mapper.map(postDto, Post.class);
+//        Post post = new Post();
+//        post.setId(postDto.getId());
+//        post.setTitle(postDto.getTitle());
+//        post.setDescription(postDto.getContent());
+//        post.setContent(postDto.getContent());
         return post;
     }
 
-    private PostDto postToPostDto(Post post){
-        PostDto postDto = new PostDto();
-        postDto.setId(post.getId());
-        postDto.setTitle(post.getTitle());
-        postDto.setDescription(post.getContent());
-        postDto.setContent(post.getContent());
+    private PostDto convertToPostDto(Post post){
+        PostDto postDto = mapper.map(post, PostDto.class);
+//        PostDto postDto = new PostDto();
+//        postDto.setId(post.getId());
+//        postDto.setTitle(post.getTitle());
+//        postDto.setDescription(post.getContent());
+//        postDto.setContent(post.getContent());
         return postDto;
     }
 }
