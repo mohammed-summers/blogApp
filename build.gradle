@@ -27,8 +27,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// model mapper
+	// Model Mapper
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
+
+	//Spring Boot Starter Validation
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.0.2'
 }
 
 tasks.named('test') {
